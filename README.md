@@ -31,8 +31,8 @@ example:
 
 ChatGPT will generate a validated pattern and return:
 
-1. An **Open in Drum AI** link, which imports the pattern into the Drum AI app.
-2. A **View web preview** link, which opens the rendered PRESET in a browser.
+1. A clickable **[Open in Drum AI](drumai://import?p=...)** link, which imports the pattern into the Drum AI app.
+2. A clickable **[View web preview](https://c1c1.online/drumai_mcp/p?p=...)** link, which opens the rendered PRESET in a browser.
 
 ## Install as your own ChatGPT plugin
 

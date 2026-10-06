@@ -2,7 +2,7 @@
 name: drumai-preset
 description: Create, edit, or analyze Drum AI drum patterns and return both a direct Drum AI app deep link and the exact PRESET web URL produced by the Drum AI PRESET MCP service. Use for drum beats, grooves, fills, styles, and PRESET rework requests.
 metadata:
-  version: "1.2"
+  version: "1.3"
 compatibility: Requires the Drum AI PRESET MCP service to be reachable.
 ---
 
@@ -43,7 +43,7 @@ For a new sequence, follow this order:
 8. Call `validate_draft`. Never return an empty or invalid pattern.
 9. Call `render_preset`.
 10. Read the `url` and `deeplink` fields from `render_preset`.
-11. Return both links, clearly labeled, with the direct app link (`deeplink`) first.
+11. Return both links as Markdown links, clearly labeled, with the direct app link (`deeplink`) first. The address must be the Markdown link destination, not code-formatted text.
 
 ## Pattern rules
 
@@ -70,13 +70,12 @@ Use these when appropriate:
 
 ## Delivery format
 
-After `render_preset` succeeds, present the result in this order:
+After `render_preset` succeeds, present the result in this exact Markdown shape, replacing only the two placeholders with the unmodified returned fields:
 
-**Open in Drum AI**
-`drumai://import?p=<value>`
+- [Open in Drum AI](<deeplink>)
+- [View web preview](<url>)
 
-**View web preview**
-`https://c1c1.online/drumai_mcp/p?p=<value>`
+Use standard Markdown link syntax so both addresses render as clickable links in ChatGPT. Do not put either address in backticks, a fenced code block, or plain-text-only output. Keep angle brackets only as part of the Markdown destination syntax; replace `<deeplink>` and `<url>` with the exact returned values, without modifying their query strings.
 
 Both must be the exact field values returned by `render_preset` — the app link comes from `deeplink`, the web link from `url`. Neither one is constructed by you.
 
