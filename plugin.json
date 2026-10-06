@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "drum-ai-sequence",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Create Drum AI drum sequences from natural-language requests using the Drum AI PRESET MCP service.",
   "author": {"name": "GOVO"},
   "extensions": {

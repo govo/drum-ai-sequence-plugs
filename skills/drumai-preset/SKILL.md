@@ -2,7 +2,7 @@
 name: drumai-preset
 description: Create, edit, or analyze Drum AI drum patterns and return both a direct Drum AI app deep link and the exact PRESET web URL produced by the Drum AI PRESET MCP service. Use for drum beats, grooves, fills, styles, and PRESET rework requests.
 metadata:
-  version: "1.1"
+  version: "1.2"
 compatibility: Requires the Drum AI PRESET MCP service to be reachable.
 ---
 
@@ -12,23 +12,16 @@ Use the Drum AI PRESET MCP service to turn a natural-language drum request into 
 
 ## Core delivery rule
 
-The final deliverable has TWO links:
+The final deliverable has TWO links, and `render_preset` returns both of them already assembled:
 
-1. A direct Drum AI app deep link in this exact form:
-   `drumai://import?p=<value>`
-2. The original web preview/import URL returned by `render_preset`, unchanged.
+1. `deeplink` — the direct Drum AI app link, of the form `drumai://import?p=<value>`
+2. `url` — the web preview/import link, of the form `https://c1c1.online/drumai_mcp/p?p=<value>`
 
-The MCP service returns a URL such as:
+Both carry the same payload and are built server-side from one encoded payload. Copy each field out whole and hand them to the user exactly as received.
 
-`https://c1c1.online/drumai_mcp/p?p=xxxxx`
+Do not modify, decode, re-encode, or truncate either value. In particular, do not build the app link yourself by copying the `p` parameter out of `url` and prepending `drumai://import?p=` — that is hand-transcription of a long base64url string, and a single dropped character makes the link unusable. The `deeplink` field already is the app link.
 
-Extract the value of the `p` query parameter and use it to construct the app deep link:
-
-`drumai://import?p=xxxxx`
-
-Do not modify, decode, re-encode, truncate, or otherwise change the `p` parameter value. The web URL must also be returned exactly as received from `render_preset`.
-
-If `render_preset` returns a URL with additional query parameters, preserve the `p` parameter value exactly and keep the entire original URL unchanged as the web link. Do not invent a deep link if the required `p` parameter is absent.
+If a returned URL carries additional query parameters, keep the whole field unchanged as the web link.
 
 The configured MCP endpoint is:
 
@@ -45,14 +38,12 @@ For a new sequence, follow this order:
 3. Call `list_grid_options` for the requested time signature and grid density.
 4. Call `create_draft` with name, BPM, time signature, `cellsPerQuarter`, bars, groove, and humanize as appropriate.
 5. Call `set_voice_grid` to write the drum pattern. Prefer writing several voices in one call when supported.
-6. Add velocity, ratchet, flam, or voice-mixer details when they materially improve the requested groove.
+6. Add per-hit velocity, ratchet, flam, or voice-mixer detail. Velocity is the main lever for dynamics and the app fully supports it — every hit can carry its own strength from `0` to `1` (`velocities` on `set_voice_grid`, a sparse map keyed by 0-based step index; omitted steps are `1.0`). Do not ship a pattern with every hit at the same strength.
 7. For multi-bar patterns, make meaningful bar-to-bar variation rather than blindly repeating one bar.
 8. Call `validate_draft`. Never return an empty or invalid pattern.
 9. Call `render_preset`.
-10. Read the `url` field from `render_preset`.
-11. Extract the `p` query parameter from that URL without changing its value.
-12. Construct `drumai://import?p=<same-value>`.
-13. Return both links, clearly labeled, with the direct app link first.
+10. Read the `url` and `deeplink` fields from `render_preset`.
+11. Return both links, clearly labeled, with the direct app link (`deeplink`) first.
 
 ## Pattern rules
 
@@ -62,6 +53,7 @@ For a new sequence, follow this order:
 - Use `3` or `6` for triplet grids.
 - Use `8` when the requested rhythm genuinely needs 32nd-note resolution, such as dense double-bass figures.
 - Velocity step indices are 0-based; `hits.beat` is 1-based.
+- Velocity is per step, not per individual hit: the extra hits a ratchet or flam adds at a step share that step's velocity. Accent the backbeat, keep the ghost notes around `0.35-0.6`, alternate strong/weak on the hats.
 - Apply fill modes before building velocity dynamics because a fill can replace a voice row and reset velocities.
 - Write variation index `0` only. Do not rely on accent or chain because the engine does not audibly use them.
 - Keep the kick/snare skeleton clear and leave musical space; do not fill every voice unnecessarily.
@@ -86,10 +78,10 @@ After `render_preset` succeeds, present the result in this order:
 **View web preview**
 `https://c1c1.online/drumai_mcp/p?p=<value>`
 
-The web preview URL must be the exact URL returned by `render_preset`. The app link is the only URL that may be constructed, and it must be constructed solely from the returned `p` query parameter.
+Both must be the exact field values returned by `render_preset` — the app link comes from `deeplink`, the web link from `url`. Neither one is constructed by you.
 
 Do not expose or rewrite the long PRESET payload separately.
 
 If the returned URL has a normal public hostname, it can be handed to the user as-is. If the MCP returns a loopback/localhost URL, report that it is only reachable from the machine hosting the service rather than pretending it is a public web link. The direct app link still requires a valid `p` parameter.
 
-If a previously returned link is reported broken, do not edit the old URL. Re-render the same draft with `render_preset` and generate fresh links from the new returned URL.
+If a previously returned link is reported broken, do not edit the old URL. Re-render the same draft with `render_preset` and hand over the fresh `deeplink` and `url` fields.
