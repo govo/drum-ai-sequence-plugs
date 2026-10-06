@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "drumai-preset": {
+      "type": "streamable-http",
+      "url": "https://c1c1.online/drumai_mcp/mcp"
+    }
+  }
+}

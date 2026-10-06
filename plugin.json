@@ -1,0 +1,26 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "drum-ai-sequence",
+  "version": "1.0.2",
+  "description": "Create Drum AI drum sequences from natural-language requests using the Drum AI PRESET MCP service.",
+  "author": {"name": "GOVO"},
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Drum AI Sequence",
+        "logo": "./assets/drum-ai-icon.png",
+        "composerIcon": "./assets/drum-ai-icon.png",
+        "shortDescription": "Create Drum AI sequences",
+        "longDescription": "Create editable drum sequences for Drum AI using the drumai-preset skill and PRESET MCP service, then return both a direct Drum AI app link and the generated web preview link.",
+        "developerName": "GOVO",
+        "category": "Music",
+        "capabilities": ["Interactive"],
+        "defaultPrompt": [
+          "Create a drum sequence from my description and give me a link to open it in Drum AI.",
+          "Make this drum beat in Drum AI.",
+          "Turn this rhythm idea into an editable Drum AI sequence."
+        ]
+      }
+    }
+  }
+}
