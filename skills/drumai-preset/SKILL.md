@@ -1,8 +1,8 @@
 ---
 name: drumai-preset
-description: Create, edit, or analyze Drum AI drum patterns and return both a direct Drum AI app deep link and the exact PRESET web URL produced by the Drum AI PRESET MCP service. Use for drum beats, grooves, fills, styles, and PRESET rework requests.
+description: Create, edit, or analyze Drum AI drum patterns and return both a direct Drum AI app deep link and the exact PRESET web URL produced by the Drum AI PRESET MCP service. Also assembles a custom drum kit out of voices taken from the built-in kits. Use for drum beats, grooves, fills, styles, PRESET rework requests, and drum kit requests.
 metadata:
-  version: "1.3"
+  version: "1.4"
 compatibility: Requires the Drum AI PRESET MCP service to be reachable.
 ---
 
@@ -67,6 +67,15 @@ Use these when appropriate:
 - `list_reference_presets` + `get_reference_preset`: useful for studying the app's reference grooves.
 - `parse_preset`: use when the user supplies an existing PRESET/share text or link and wants it edited.
 - `render_wireframe`: use for read-only inspection of an existing pattern.
+
+## Building a custom kit (a different job)
+
+When the request is for a **kit** rather than a pattern — "make me a kit with an 808 kick and acoustic toms", "combine these two drumsets" — use `render_kit`, not the creation flow. A kit is a set of voices; a PRESET is a rhythm played on those voices. Nothing in the flow above applies. If the user asks for both, build the kit first and then write the pattern on it.
+
+1. Call `list_kits` and `get_kit` to get the voice **indices** you want to take from.
+2. Call `render_kit` with `name` and `slots`: one entry per voice of the new kit, in the order they should appear, each `{ "from": { "kit": "kit-13", "index": 0 } }`. Slots must number 8 to 16, every `kit` must be a built-in kit id, and you should pull from at least two kits.
+3. Add `"alias": "Rim"` to a slot to give that voice a short name in the app (at most 8 characters); without it the slot keeps the source voice's name.
+4. Hand over the returned `url` and `deeplink` exactly as with `render_preset`. Two differences to pass on: the kit page does **not** open the app by itself (the user taps "Open in App"), and opening the kit deep link creates the kit **immediately** — the app asks nothing and only shows a short notice afterwards.
 
 ## Delivery format
 
